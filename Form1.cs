@@ -1,4 +1,22 @@
-﻿using System;
+﻿// Samuel Williams, 30119279
+// Date: 2025-06-16
+// Version: 1.0
+// Application: Licence Plate Manager
+// Description: A simple Windows Forms application to manage a list of licence plates.
+// --------------------------------------------------------------------------------------------------------------------
+// PROGRAM FUNCTIONALITIES                                              |   STATUS. BLANK = NOT COMPLETE
+// Open text file and load data.                                        |   
+// Save data to text file.                                              |   
+// Add new rego plate.                                                  |   
+// Delete an existing rego plate.                                       |   
+// Edit or update and existing rego plate.                              |   
+// Linear Search for a specific rego plate.                             |   
+// Binary Search for a specific rego plate.                             |   
+// Tag a specific rego plate for further investigation.                 |   
+// A reset button to remove all rego plate data from the List<>.        |   
+// ---------------------------------------------------------------------------------------------------------------------
+
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
