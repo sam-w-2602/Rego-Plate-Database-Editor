@@ -16,5 +16,30 @@ namespace at3_c_1
         {
             InitializeComponent();
         }
+
+        //
+        private void buttonAdd_Click(object sender, EventArgs e)
+        {
+            //check if the text box is empty
+            if (string.IsNullOrWhiteSpace(textBoxInput.Text))
+            {
+                MessageBox.Show("Please enter a licence plate.");
+                return;
+            }
+
+            //check if the licence plate already exists
+            if (listBoxPlateView.Items.Contains(textBoxInput.Text))
+            {
+                MessageBox.Show("This licence plate already exists.");
+                return;
+            }
+
+            //add the licence plate to the list box
+            listBoxPlateView.Items.Add(textBoxInput.Text);
+            //clear the text box
+            textBoxInput.Clear();
+            textBoxInput.Focus();
+
+        }
     }
 }
