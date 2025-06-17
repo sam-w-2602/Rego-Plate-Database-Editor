@@ -7,7 +7,7 @@
 // PROGRAM FUNCTIONALITIES                                              |   STATUS. BLANK = NOT COMPLETE
 // Open text file and load data.                                        |   
 // Save data to text file.                                              |   
-// Add new rego plate.                                                  |   
+// Add new rego plate.                                                  |   COMPLETE
 // Delete an existing rego plate.                                       |   
 // Edit or update and existing rego plate.                              |   
 // Linear Search for a specific rego plate.                             |   
@@ -35,7 +35,10 @@ namespace at3_c_1
             InitializeComponent();
         }
 
-        //
+        // Create array for licence plates
+        private List<string> licencePlates = new List<string>();
+
+
         private void buttonAdd_Click(object sender, EventArgs e)
         {
             //check if the text box is empty
@@ -51,13 +54,32 @@ namespace at3_c_1
                 MessageBox.Show("This licence plate already exists.");
                 return;
             }
-
-            //add the licence plate to the list box
-            listBoxPlateView.Items.Add(textBoxInput.Text);
-            //clear the text box
+            licencePlates.Add(textBoxInput.Text);
+            DisplayList();
             textBoxInput.Clear();
             textBoxInput.Focus();
+        }
 
+        private void buttonDelete_Click(object sender, EventArgs e)
+        {
+            listBoxPlateView.SetSelected(listBoxPlateView.SelectedIndex, true);
+            licencePlates.RemoveAt(listBoxPlateView.SelectedIndex);
+            DisplayList();
+        }
+
+        private void buttonOpen_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        //common functions
+        private void DisplayList()
+        {
+            listBoxPlateView.Items.Clear();
+            foreach (var plate in licencePlates)
+            {
+                listBoxPlateView.Items.Add(plate);
+            }
         }
     }
 }
