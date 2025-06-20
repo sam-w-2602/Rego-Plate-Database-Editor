@@ -300,6 +300,9 @@ namespace at3_c_1
         {
             listBoxPlateView.Items.Clear();
             listBoxTaggedPlates.Items.Clear();
+            licencePlates.Sort();
+            taggedPlates.Sort();
+
             foreach (var plate in licencePlates.OrderBy(p => p.ToUpper()))
             {
                 if (!taggedPlates.Contains(plate))
@@ -460,7 +463,56 @@ namespace at3_c_1
 
         private void buttonLinearSearch_Click(object sender, EventArgs e)
         {
+            string target = textBoxInput.Text.Trim().ToUpper();
 
+            if (string.IsNullOrWhiteSpace(target))
+            {
+                MessageBox.Show("Please enter a licence plate to search for.");
+                return;
+            }
+
+            // Search in the main list
+            for (int i = 0; i < licencePlates.Count; i++)
+            {
+                if (licencePlates[i].Equals(target, StringComparison.OrdinalIgnoreCase))
+                {
+                    listBoxPlateView.SelectedIndex = i;
+                    listBoxTaggedPlates.ClearSelected(); // Deselect other box
+                    toolStripStatusLabel1.Text = $"'{target}' found in main list at index {i}.";
+                    return;
+                }
+            }
+
+            // Search in the tagged list
+            for (int i = 0; i < taggedPlates.Count; i++)
+            {
+                if (taggedPlates[i].Equals(target, StringComparison.OrdinalIgnoreCase))
+                {
+                    // Build the displayed version (with prefix)
+                    string displayTagged = "Tagged: " + taggedPlates[i];
+
+                    // Find the correct index in the ListBox
+                    int listBoxIndex = listBoxTaggedPlates.Items.IndexOf(displayTagged);
+
+                    if (listBoxIndex != -1)
+                    {
+                        listBoxTaggedPlates.SelectedIndex = listBoxIndex;
+                        listBoxPlateView.ClearSelected(); // Deselect main list
+                        toolStripStatusLabel1.Text = $"'{target}' found in tagged list at index {i}.";
+                    }
+                    else
+                    {
+                        toolStripStatusLabel1.Text = $"'{target}' found in data but not in the ListBox (possible sync issue).";
+                    }
+
+                    return;
+                }
+            }
+
+            // If not found in either list
+            toolStripStatusLabel1.Text = $"'{target}' not found in any list.";
         }
+
+
     }
 }
