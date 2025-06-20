@@ -148,6 +148,7 @@ namespace at3_c_1
             this.buttonLinearSearch.TabIndex = 9;
             this.buttonLinearSearch.Text = "Search (Linear)";
             this.buttonLinearSearch.UseVisualStyleBackColor = true;
+            this.buttonLinearSearch.Click += new System.EventHandler(this.buttonLinearSearch_Click);
             // 
             // buttonBinarySearch
             // 

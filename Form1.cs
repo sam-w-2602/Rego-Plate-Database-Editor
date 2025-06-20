@@ -300,14 +300,14 @@ namespace at3_c_1
         {
             listBoxPlateView.Items.Clear();
             listBoxTaggedPlates.Items.Clear();
-            foreach (var plate in licencePlates)
+            foreach (var plate in licencePlates.OrderBy(p => p.ToUpper()))
             {
                 if (!taggedPlates.Contains(plate))
                 {
                     listBoxPlateView.Items.Add(plate);
                 }
             }
-            foreach (var taggedPlate in taggedPlates)
+            foreach (var taggedPlate in taggedPlates.OrderBy(p => p.ToUpper()))
             {
                 listBoxTaggedPlates.Items.Add($"Tagged: {taggedPlate}");
             }
@@ -456,6 +456,11 @@ namespace at3_c_1
                 textBoxInput.Focus();
                 textBoxInput.SelectAll();
             }
+        }
+
+        private void buttonLinearSearch_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }
