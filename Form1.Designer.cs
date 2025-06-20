@@ -32,7 +32,7 @@ namespace at3_c_1
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.listBoxPlateView = new System.Windows.Forms.ListBox();
-            this.statusStrip1 = new System.Windows.Forms.StatusStrip();
+            this.statusStrip = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.listBoxTaggedPlates = new System.Windows.Forms.ListBox();
             this.textBoxInput = new System.Windows.Forms.TextBox();
@@ -47,7 +47,8 @@ namespace at3_c_1
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.textBox2 = new System.Windows.Forms.TextBox();
             this.buttonOpen = new System.Windows.Forms.Button();
-            this.statusStrip1.SuspendLayout();
+            this.buttonReset = new System.Windows.Forms.Button();
+            this.statusStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -59,17 +60,19 @@ namespace at3_c_1
             this.listBoxPlateView.Name = "listBoxPlateView";
             this.listBoxPlateView.Size = new System.Drawing.Size(208, 316);
             this.listBoxPlateView.TabIndex = 0;
+            this.listBoxPlateView.SelectedIndexChanged += new System.EventHandler(this.listBoxPlateView_SelectedIndexChanged);
             this.listBoxPlateView.SelectedValueChanged += new System.EventHandler(this.listBoxPlateView_SelectedValueChanged);
+            this.listBoxPlateView.DoubleClick += new System.EventHandler(this.listBoxPlateView_DoubleClick);
             // 
-            // statusStrip1
+            // statusStrip
             // 
-            this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripStatusLabel1});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 483);
-            this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(455, 22);
-            this.statusStrip1.TabIndex = 1;
-            this.statusStrip1.Text = "statusStrip";
+            this.statusStrip.Location = new System.Drawing.Point(0, 495);
+            this.statusStrip.Name = "statusStrip";
+            this.statusStrip.Size = new System.Drawing.Size(455, 22);
+            this.statusStrip.TabIndex = 1;
+            this.statusStrip.Text = "statusStrip";
             // 
             // toolStripStatusLabel1
             // 
@@ -84,7 +87,9 @@ namespace at3_c_1
             this.listBoxTaggedPlates.Name = "listBoxTaggedPlates";
             this.listBoxTaggedPlates.Size = new System.Drawing.Size(208, 251);
             this.listBoxTaggedPlates.TabIndex = 2;
+            this.listBoxTaggedPlates.SelectedIndexChanged += new System.EventHandler(this.listBoxTaggedPlates_SelectedIndexChanged);
             this.listBoxTaggedPlates.SelectedValueChanged += new System.EventHandler(this.listBoxTaggedPlates_SelectedValueChanged);
+            this.listBoxTaggedPlates.DoubleClick += new System.EventHandler(this.listBoxTaggedPlates_DoubleClick);
             // 
             // textBoxInput
             // 
@@ -212,12 +217,23 @@ namespace at3_c_1
             this.buttonOpen.UseVisualStyleBackColor = true;
             this.buttonOpen.Click += new System.EventHandler(this.buttonOpen_Click);
             // 
+            // buttonReset
+            // 
+            this.buttonReset.Location = new System.Drawing.Point(179, 469);
+            this.buttonReset.Name = "buttonReset";
+            this.buttonReset.Size = new System.Drawing.Size(104, 23);
+            this.buttonReset.TabIndex = 16;
+            this.buttonReset.Text = "Reset";
+            this.buttonReset.UseVisualStyleBackColor = true;
+            this.buttonReset.Click += new System.EventHandler(this.buttonReset_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
-            this.ClientSize = new System.Drawing.Size(455, 505);
+            this.ClientSize = new System.Drawing.Size(455, 517);
+            this.Controls.Add(this.buttonReset);
             this.Controls.Add(this.buttonOpen);
             this.Controls.Add(this.textBox2);
             this.Controls.Add(this.textBox1);
@@ -231,12 +247,12 @@ namespace at3_c_1
             this.Controls.Add(this.buttonEdit);
             this.Controls.Add(this.textBoxInput);
             this.Controls.Add(this.listBoxTaggedPlates);
-            this.Controls.Add(this.statusStrip1);
+            this.Controls.Add(this.statusStrip);
             this.Controls.Add(this.listBoxPlateView);
             this.Name = "Form1";
             this.Text = "Form1";
-            this.statusStrip1.ResumeLayout(false);
-            this.statusStrip1.PerformLayout();
+            this.statusStrip.ResumeLayout(false);
+            this.statusStrip.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -246,7 +262,7 @@ namespace at3_c_1
         #endregion
 
         private System.Windows.Forms.ListBox listBoxPlateView;
-        private System.Windows.Forms.StatusStrip statusStrip1;
+        private System.Windows.Forms.StatusStrip statusStrip;
         private System.Windows.Forms.ListBox listBoxTaggedPlates;
         private System.Windows.Forms.TextBox textBoxInput;
         private System.Windows.Forms.Button buttonEdit;
@@ -261,6 +277,7 @@ namespace at3_c_1
         private System.Windows.Forms.TextBox textBox2;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
         private System.Windows.Forms.Button buttonOpen;
+        private Button buttonReset;
     }
 }
 

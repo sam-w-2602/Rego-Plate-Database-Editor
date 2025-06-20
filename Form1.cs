@@ -12,8 +12,8 @@
 // Edit or update and existing rego plate.                              |   COMPLETE
 // Linear Search for a specific rego plate.                             |   
 // Binary Search for a specific rego plate.                             |   
-// Tag a specific rego plate for further investigation.                 |   
-// A reset button to remove all rego plate data from the List<>.        |   
+// Tag a specific rego plate for further investigation.                 |   COMPLETE
+// A reset button to remove all rego plate data from the List<>.        |   COMPLETE
 // ---------------------------------------------------------------------------------------------------------------------
 
 using System;
@@ -193,7 +193,36 @@ namespace at3_c_1
 
             DisplayList();
         }
+        private void buttonReset_Click(object sender, EventArgs e)
+        {
+            // Show confirmation dialog
+            DialogResult result = MessageBox.Show(
+                "Are you sure you want to reset all licence plates?",
+                "Confirm Reset",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Warning);
 
+            if (result == DialogResult.Yes)
+            {
+                // clear arrays
+                licencePlates.Clear();
+                taggedPlates.Clear();
+
+                //clear list boxes
+                listBoxPlateView.Items.Clear();
+                listBoxTaggedPlates.Items.Clear();
+
+                //clear input box
+                textBoxInput.Clear();
+                textBoxInput.Focus();
+
+                DisplayList();
+            }
+            else
+            {
+                toolStripStatusLabel1.Text = "Reset cancelled.";
+            }
+        }
         private void buttonSave_Click(object sender, EventArgs e)
         {
             string listsFolder = Path.Combine(Application.StartupPath, "lists");
@@ -216,6 +245,7 @@ namespace at3_c_1
             }
         }
 
+        // opens a text file and reads the contents into the list boxes
         private void buttonOpen_Click(object sender, EventArgs e)
         {
             string listsFolder = Path.Combine(Application.StartupPath, "lists");
@@ -302,7 +332,7 @@ namespace at3_c_1
             }
             catch (IOException)
             {
-                MessageBox.Show("File NOT saved");
+                toolStripStatusLabel1.Text = "File NOT saved";
             }
         }
 
@@ -330,6 +360,101 @@ namespace at3_c_1
             if (listBoxTaggedPlates.SelectedIndex != -1)
             {
                 listBoxPlateView.ClearSelected();
+            }
+        }
+
+        //double click functions
+        private void listBoxPlateView_DoubleClick(object sender, EventArgs e)
+        {
+            if (listBoxPlateView.SelectedIndex == -1)
+                return; // No selection
+
+            string selectedPlate = listBoxPlateView.SelectedItem.ToString();
+
+            // Show confirmation dialog
+            DialogResult result = MessageBox.Show(
+                $"Do you want to remove licence plate '{selectedPlate}'?",
+                "Confirm Removal",
+                MessageBoxButtons.OKCancel,
+                MessageBoxIcon.Question);
+
+            if (result == DialogResult.OK)
+            {
+                // Remove from licencePlates list
+                licencePlates.Remove(selectedPlate);
+
+                // If the input TextBox has the same text, clear it
+                if (textBoxInput.Text.Trim().Equals(selectedPlate, StringComparison.OrdinalIgnoreCase))
+                {
+                    textBoxInput.Clear();
+                }
+
+                // Refresh both list boxes
+                DisplayList();
+            }
+        }
+
+        private void listBoxTaggedPlates_DoubleClick(object sender, EventArgs e)
+        {
+            if (listBoxTaggedPlates.SelectedIndex == -1)
+                return; // No plate selected
+
+            string selectedWithPrefix = listBoxTaggedPlates.SelectedItem.ToString();
+
+            // Remove "Tagged: " prefix to get the actual plate
+            const string prefix = "Tagged: ";
+            string selectedPlate = selectedWithPrefix.StartsWith(prefix)
+                ? selectedWithPrefix.Substring(prefix.Length).Trim()
+                : selectedWithPrefix;
+
+            // Confirm removal
+            DialogResult result = MessageBox.Show(
+                $"Do you want to remove tagged licence plate '{selectedPlate}'?",
+                "Confirm Removal",
+                MessageBoxButtons.OKCancel,
+                MessageBoxIcon.Warning);
+
+            if (result == DialogResult.OK)
+            {
+                // Remove from taggedPlates list
+                taggedPlates.Remove(selectedPlate);
+
+                // Clear input box if it matches
+                if (textBoxInput.Text.Trim().Equals(selectedPlate, StringComparison.OrdinalIgnoreCase))
+                {
+                    textBoxInput.Clear();
+                }
+
+                // Refresh the display
+                DisplayList();
+            }
+        }
+
+        // load selected plate into input box when selected in list boxes
+        private void listBoxPlateView_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (listBoxPlateView.SelectedIndex != -1)
+            {
+                string selectedPlate = listBoxPlateView.SelectedItem.ToString();
+                textBoxInput.Text = selectedPlate;
+                textBoxInput.Focus();
+                textBoxInput.SelectAll();
+            }
+        }
+
+        private void listBoxTaggedPlates_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (listBoxTaggedPlates.SelectedIndex != -1)
+            {
+                string selectedWithPrefix = listBoxTaggedPlates.SelectedItem.ToString();
+                const string prefix = "Tagged: ";
+                string plate = selectedWithPrefix.StartsWith(prefix)
+                    ? selectedWithPrefix.Substring(prefix.Length).Trim()
+                    : selectedWithPrefix;
+
+                textBoxInput.Text = plate;
+                textBoxInput.Focus();
+                textBoxInput.SelectAll();
             }
         }
     }
