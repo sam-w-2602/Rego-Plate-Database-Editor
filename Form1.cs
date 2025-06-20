@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Drawing.Text;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -40,8 +41,9 @@ namespace at3_c_1
         private List<string> licencePlates = new List<string>();
         private List<string> taggedPlates = new List<string>();
         string currentFileName = "";
+        private bool isModified = false;
 
-
+        #region Add Delete Edit functions
         private void buttonAdd_Click(object sender, EventArgs e)
         {
             string plateInput = textBoxInput.Text.ToUpper();
@@ -68,6 +70,7 @@ namespace at3_c_1
             DisplayList();
             textBoxInput.Clear();
             textBoxInput.Focus();
+            isModified = true;
         }
 
         private void buttonDelete_Click(object sender, EventArgs e)
@@ -98,6 +101,7 @@ namespace at3_c_1
                 taggedPlates.Remove(plate);
             }
 
+            isModified = true;
             DisplayList();
         }
 
@@ -143,9 +147,13 @@ namespace at3_c_1
                 taggedPlates.Add(plateInput);
             }
             textBoxInput.Clear();
+            isModified = true;
             DisplayList();
         }
 
+        #endregion add delete edit functions
+
+        #region Tag and reset functions
         private void buttonTag_Click(object sender, EventArgs e)
         {
             // Tag from the main plates list
@@ -191,6 +199,7 @@ namespace at3_c_1
                 return;
             }
 
+            isModified = true;
             DisplayList();
         }
         private void buttonReset_Click(object sender, EventArgs e)
@@ -217,12 +226,16 @@ namespace at3_c_1
                 textBoxInput.Focus();
 
                 DisplayList();
+                isModified = true;
             }
             else
             {
                 toolStripStatusLabel1.Text = "Reset cancelled.";
             }
         }
+        #endregion Tag and reset functions
+
+        #region File Operations
         private void buttonSave_Click(object sender, EventArgs e)
         {
             string listsFolder = Path.Combine(Application.StartupPath, "lists");
@@ -293,27 +306,7 @@ namespace at3_c_1
                     MessageBox.Show("Failed to read file: " + ex.Message);
                 }
             }
-        }
-
-        //common functions
-        private void DisplayList()
-        {
-            listBoxPlateView.Items.Clear();
-            listBoxTaggedPlates.Items.Clear();
-            licencePlates.Sort();
-            taggedPlates.Sort();
-
-            foreach (var plate in licencePlates.OrderBy(p => p.ToUpper()))
-            {
-                if (!taggedPlates.Contains(plate))
-                {
-                    listBoxPlateView.Items.Add(plate);
-                }
-            }
-            foreach (var taggedPlate in taggedPlates.OrderBy(p => p.ToUpper()))
-            {
-                listBoxTaggedPlates.Items.Add($"Tagged: {taggedPlate}");
-            }
+            isModified = true;
         }
 
         // saves the text file to the location specified by the user
@@ -337,6 +330,94 @@ namespace at3_c_1
             {
                 toolStripStatusLabel1.Text = "File NOT saved";
             }
+
+            isModified = false; // Reset modified flag after saving
+        }
+
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (!isModified)
+            {
+                return; // No unsaved changes, just close the form
+            }
+
+            // Prompt user to save changes if there are any unsaved changes
+            DialogResult result = MessageBox.Show(
+                "Do you want to save changes before exiting?",
+                "Confirm Save",
+                MessageBoxButtons.YesNoCancel,
+                MessageBoxIcon.Question);
+
+            // If user chooses to cancel, prevent the form from closing
+            if (result == DialogResult.Cancel)
+            {
+                e.Cancel = true; // Cancel closing if user chooses to cancel
+                return;
+            }
+            // If user chooses not to save, just close the form
+            else if (result == DialogResult.No)
+            {
+                return;
+            }
+
+            // executed if usesr chooses to save
+
+            // Ensure the folder exists
+            string folderPath = Path.Combine(Application.StartupPath, "lists");
+            if (!Directory.Exists(folderPath))
+            {
+                Directory.CreateDirectory(folderPath);
+            }
+
+            // Generate a unique file name
+            int fileNumber = 1;
+            string fileName;
+            string filePath;
+
+            do
+            {
+                fileName = $"day_{fileNumber:D2}.txt";
+                filePath = Path.Combine(folderPath, fileName);
+                fileNumber++;
+            } while (File.Exists(filePath));
+
+            //write data
+            using (StreamWriter writer = new StreamWriter(filePath, false))
+            {
+                foreach (string plate in licencePlates)
+                {
+                    writer.WriteLine(plate);
+                }
+                foreach (string taggedPlate in taggedPlates)
+                {
+                    writer.WriteLine($"Tagged: {taggedPlate}");
+                }
+            }
+            // Notify user of successful save, close once user clicks ok
+            MessageBox.Show($"Data saved to {fileName} successfully.", "Save", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+        #endregion File Operations
+
+        #region Display and Utility Methods
+
+        private void DisplayList()
+        {
+            listBoxPlateView.Items.Clear();
+            listBoxTaggedPlates.Items.Clear();
+            licencePlates.Sort();
+            taggedPlates.Sort();
+
+            foreach (var plate in licencePlates.OrderBy(p => p.ToUpper()))
+            {
+                if (!taggedPlates.Contains(plate))
+                {
+                    listBoxPlateView.Items.Add(plate);
+                }
+            }
+            foreach (var taggedPlate in taggedPlates.OrderBy(p => p.ToUpper()))
+            {
+                listBoxTaggedPlates.Items.Add($"Tagged: {taggedPlate}");
+            }
         }
 
         // allows for enter to add a plate rather than having to press add every time
@@ -349,6 +430,108 @@ namespace at3_c_1
             }
         }
 
+        #endregion Display and Utility Methods
+
+        #region Search Functions
+        private void buttonBinarySearch_Click(object sender, EventArgs e)
+        {
+            string target = textBoxInput.Text.Trim().ToUpper();
+
+            if (string.IsNullOrWhiteSpace(target))
+            {
+                MessageBox.Show("Please enter a licence plate to search for.");
+                return;
+            }
+
+            // Ensure list is sorted before binary search
+            licencePlates.Sort(StringComparer.OrdinalIgnoreCase);
+            taggedPlates.Sort(StringComparer.OrdinalIgnoreCase);
+
+            // Perform binary search on main list
+            int index = licencePlates.BinarySearch(target, StringComparer.OrdinalIgnoreCase);
+            if (index >= 0)
+            {
+                listBoxPlateView.SelectedIndex = index;
+                listBoxTaggedPlates.ClearSelected();
+                toolStripStatusLabel1.Text = $"'{target}' found in main list at index {index} (Binary Algorithm).";
+                return;
+            }
+
+            int taggedIndex = taggedPlates.BinarySearch(target, StringComparer.OrdinalIgnoreCase);
+            if (taggedIndex >= 0)
+            {
+                // Build the displayed version (with prefix)
+                string displayTagged = "Tagged: " + taggedPlates[taggedIndex];
+
+                // Find the correct index in the ListBox
+                int listBoxIndex = listBoxTaggedPlates.Items.IndexOf(displayTagged);
+                if (listBoxIndex != -1)
+                {
+                    listBoxTaggedPlates.SelectedIndex = listBoxIndex;
+                    listBoxPlateView.ClearSelected();
+                    toolStripStatusLabel1.Text = $"'{target}' found in tagged list at index {taggedIndex} (Binary Algorithm).";
+                    return;
+                }
+            }
+            else
+            {
+                toolStripStatusLabel1.Text = $"'{target}' not found in main list (Binary Algorithm).";
+            }
+            textBoxInput.Clear();
+            textBoxInput.Focus();
+        }
+
+        private void buttonLinearSearch_Click(object sender, EventArgs e)
+        {
+            string target = textBoxInput.Text.Trim().ToUpper();
+
+            if (string.IsNullOrWhiteSpace(target))
+            {
+                MessageBox.Show("Please enter a licence plate to search for.");
+                return;
+            }
+
+            // Search in the main list
+            for (int i = 0; i < licencePlates.Count; i++)
+            {
+                if (licencePlates[i].Equals(target, StringComparison.OrdinalIgnoreCase))
+                {
+                    listBoxPlateView.SelectedIndex = i;
+                    listBoxTaggedPlates.ClearSelected(); // Deselect other box
+                    toolStripStatusLabel1.Text = $"'{target}' found in main list at index {i} (Linear algorithm).";
+                    return;
+                }
+            }
+
+            // Search in the tagged list
+            for (int i = 0; i < taggedPlates.Count; i++)
+            {
+                if (taggedPlates[i].Equals(target, StringComparison.OrdinalIgnoreCase))
+                {
+                    // Build the displayed version (with prefix)
+                    string displayTagged = "Tagged: " + taggedPlates[i];
+
+                    // Find the correct index in the ListBox
+                    int listBoxIndex = listBoxTaggedPlates.Items.IndexOf(displayTagged);
+
+                    if (listBoxIndex != -1)
+                    {
+                        listBoxTaggedPlates.SelectedIndex = listBoxIndex;
+                        listBoxPlateView.ClearSelected(); // Deselect main list
+                        toolStripStatusLabel1.Text = $"'{target}' found in tagged list at index {i}. (Linear algorithm)";
+                    }
+                    return;
+                }
+            }
+            // If not found in either list
+            toolStripStatusLabel1.Text = $"'{target}' not found in any list. (Linear algorithm)";
+            textBoxInput.Clear();
+            textBoxInput.Focus();
+        }
+
+        #endregion Search Functions
+
+        #region ListBox Event functions
         // only allows for 1 item to be selected (unselects item in one box if other box is selected)
         private void listBoxPlateView_SelectedValueChanged(object sender, EventArgs e)
         {
@@ -461,158 +644,6 @@ namespace at3_c_1
             }
         }
 
-        private void buttonLinearSearch_Click(object sender, EventArgs e)
-        {
-            string target = textBoxInput.Text.Trim().ToUpper();
-
-            if (string.IsNullOrWhiteSpace(target))
-            {
-                MessageBox.Show("Please enter a licence plate to search for.");
-                return;
-            }
-
-            // Search in the main list
-            for (int i = 0; i < licencePlates.Count; i++)
-            {
-                if (licencePlates[i].Equals(target, StringComparison.OrdinalIgnoreCase))
-                {
-                    listBoxPlateView.SelectedIndex = i;
-                    listBoxTaggedPlates.ClearSelected(); // Deselect other box
-                    toolStripStatusLabel1.Text = $"'{target}' found in main list at index {i} (Linear algorithm).";
-                    return;
-                }
-            }
-
-            // Search in the tagged list
-            for (int i = 0; i < taggedPlates.Count; i++)
-            {
-                if (taggedPlates[i].Equals(target, StringComparison.OrdinalIgnoreCase))
-                {
-                    // Build the displayed version (with prefix)
-                    string displayTagged = "Tagged: " + taggedPlates[i];
-
-                    // Find the correct index in the ListBox
-                    int listBoxIndex = listBoxTaggedPlates.Items.IndexOf(displayTagged);
-
-                    if (listBoxIndex != -1)
-                    {
-                        listBoxTaggedPlates.SelectedIndex = listBoxIndex;
-                        listBoxPlateView.ClearSelected(); // Deselect main list
-                        toolStripStatusLabel1.Text = $"'{target}' found in tagged list at index {i}. (Linear algorithm)";
-                    }
-                    return;
-                }
-            }
-            // If not found in either list
-            toolStripStatusLabel1.Text = $"'{target}' not found in any list. (Linear algorithm)";
-            textBoxInput.Clear();
-            textBoxInput.Focus();
-        }
-
-        private void buttonBinarySearch_Click(object sender, EventArgs e)
-        {
-            string target = textBoxInput.Text.Trim().ToUpper();
-
-            if (string.IsNullOrWhiteSpace(target))
-            {
-                MessageBox.Show("Please enter a licence plate to search for.");
-                return;
-            }
-
-            // Ensure list is sorted before binary search
-            licencePlates.Sort(StringComparer.OrdinalIgnoreCase);
-            taggedPlates.Sort(StringComparer.OrdinalIgnoreCase);
-
-            // Perform binary search on main list
-            int index = licencePlates.BinarySearch(target, StringComparer.OrdinalIgnoreCase);
-            if (index >= 0)
-            {
-                listBoxPlateView.SelectedIndex = index;
-                listBoxTaggedPlates.ClearSelected();
-                toolStripStatusLabel1.Text = $"'{target}' found in main list at index {index} (Binary Algorithm).";
-                return;
-            }
-
-            int taggedIndex = taggedPlates.BinarySearch(target, StringComparer.OrdinalIgnoreCase);
-            if (taggedIndex >= 0)
-            {
-                // Build the displayed version (with prefix)
-                string displayTagged = "Tagged: " + taggedPlates[taggedIndex];
-
-                // Find the correct index in the ListBox
-                int listBoxIndex = listBoxTaggedPlates.Items.IndexOf(displayTagged);
-                if (listBoxIndex != -1)
-                {
-                    listBoxTaggedPlates.SelectedIndex = listBoxIndex;
-                    listBoxPlateView.ClearSelected();
-                    toolStripStatusLabel1.Text = $"'{target}' found in tagged list at index {taggedIndex} (Binary Algorithm).";
-                    return;
-                }
-            }
-            else
-            {
-                toolStripStatusLabel1.Text = $"'{target}' not found in main list (Binary Algorithm).";
-            }
-            textBoxInput.Clear();
-            textBoxInput.Focus();
-        }
-
-        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            // Prompt user to save changes if there are any unsaved changes
-            DialogResult result = MessageBox.Show(
-                "Do you want to save changes before exiting?",
-                "Confirm Save",
-                MessageBoxButtons.YesNoCancel,
-                MessageBoxIcon.Question);
-
-            // If user chooses to cancel, prevent the form from closing
-            if (result == DialogResult.Cancel)
-            {
-                e.Cancel = true; // Cancel closing if user chooses to cancel
-                return;
-            }
-            // If user chooses not to save, just close the form
-            else if (result == DialogResult.No)
-            {
-                return;
-            }
-
-            // executed if usesr chooses to save
-
-            // Ensure the folder exists
-            string folderPath = Path.Combine(Application.StartupPath, "lists");
-            if (!Directory.Exists(folderPath))
-            {
-                Directory.CreateDirectory(folderPath);
-            }
-
-            // Generate a unique file name
-            int fileNumber = 1;
-            string fileName;
-            string filePath;
-
-            do
-            {
-                fileName = $"day_{fileNumber:D2}.txt";
-                filePath = Path.Combine(folderPath, fileName);
-                fileNumber++;
-            } while (File.Exists(filePath));
-
-            //write data
-            using (StreamWriter writer = new StreamWriter(filePath, false))
-            {
-                foreach (string plate in licencePlates)
-                {
-                    writer.WriteLine(plate);
-                }
-                foreach (string taggedPlate in taggedPlates)
-                {
-                    writer.WriteLine($"Tagged: {taggedPlate}");
-                }
-            }
-            // Notify user of successful save, close once user clicks ok
-            MessageBox.Show($"Data saved to {fileName} successfully.", "Save", MessageBoxButtons.OK, MessageBoxIcon.Information);
-        }
+        #endregion ListBox Event functions
     }
 }
