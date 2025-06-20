@@ -478,7 +478,7 @@ namespace at3_c_1
                 {
                     listBoxPlateView.SelectedIndex = i;
                     listBoxTaggedPlates.ClearSelected(); // Deselect other box
-                    toolStripStatusLabel1.Text = $"'{target}' found in main list at index {i}.";
+                    toolStripStatusLabel1.Text = $"'{target}' found in main list at index {i} (Linear algorithm).";
                     return;
                 }
             }
@@ -498,21 +498,63 @@ namespace at3_c_1
                     {
                         listBoxTaggedPlates.SelectedIndex = listBoxIndex;
                         listBoxPlateView.ClearSelected(); // Deselect main list
-                        toolStripStatusLabel1.Text = $"'{target}' found in tagged list at index {i}.";
+                        toolStripStatusLabel1.Text = $"'{target}' found in tagged list at index {i}. (Linear algorithm)";
                     }
-                    else
-                    {
-                        toolStripStatusLabel1.Text = $"'{target}' found in data but not in the ListBox (possible sync issue).";
-                    }
-
                     return;
                 }
             }
-
             // If not found in either list
-            toolStripStatusLabel1.Text = $"'{target}' not found in any list.";
+            toolStripStatusLabel1.Text = $"'{target}' not found in any list. (Linear algorithm)";
+            textBoxInput.Clear();
+            textBoxInput.Focus();
         }
 
+        private void buttonBinarySearch_Click(object sender, EventArgs e)
+        {
+            string target = textBoxInput.Text.Trim().ToUpper();
 
+            if (string.IsNullOrWhiteSpace(target))
+            {
+                MessageBox.Show("Please enter a licence plate to search for.");
+                return;
+            }
+
+            // Ensure list is sorted before binary search
+            licencePlates.Sort(StringComparer.OrdinalIgnoreCase);
+            taggedPlates.Sort(StringComparer.OrdinalIgnoreCase);
+
+            // Perform binary search on main list
+            int index = licencePlates.BinarySearch(target, StringComparer.OrdinalIgnoreCase);
+            if (index >= 0)
+            {
+                listBoxPlateView.SelectedIndex = index;
+                listBoxTaggedPlates.ClearSelected();
+                toolStripStatusLabel1.Text = $"'{target}' found in main list at index {index} (Binary Algorithm).";
+                return;
+            }
+
+            int taggedIndex = taggedPlates.BinarySearch(target, StringComparer.OrdinalIgnoreCase);
+            if (taggedIndex >= 0)
+            {
+                // Build the displayed version (with prefix)
+                string displayTagged = "Tagged: " + taggedPlates[taggedIndex];
+
+                // Find the correct index in the ListBox
+                int listBoxIndex = listBoxTaggedPlates.Items.IndexOf(displayTagged);
+                if (listBoxIndex != -1)
+                {
+                    listBoxTaggedPlates.SelectedIndex = listBoxIndex;
+                    listBoxPlateView.ClearSelected();
+                    toolStripStatusLabel1.Text = $"'{target}' found in tagged list at index {taggedIndex} (Binary Algorithm).";
+                    return;
+                }
+            }
+            else
+            {
+                toolStripStatusLabel1.Text = $"'{target}' not found in main list (Binary Algorithm).";
+            }
+            textBoxInput.Clear();
+            textBoxInput.Focus();
+        }
     }
 }

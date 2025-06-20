@@ -158,6 +158,7 @@ namespace at3_c_1
             this.buttonBinarySearch.TabIndex = 10;
             this.buttonBinarySearch.Text = "Search (Binary)";
             this.buttonBinarySearch.UseVisualStyleBackColor = true;
+            this.buttonBinarySearch.Click += new System.EventHandler(this.buttonBinarySearch_Click);
             // 
             // buttonTag
             // 
