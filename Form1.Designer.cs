@@ -1,4 +1,6 @@
-﻿namespace at3_c_1
+﻿using System.Windows.Forms;
+
+namespace at3_c_1
 {
     partial class Form1
     {
@@ -57,6 +59,7 @@
             this.listBoxPlateView.Name = "listBoxPlateView";
             this.listBoxPlateView.Size = new System.Drawing.Size(208, 316);
             this.listBoxPlateView.TabIndex = 0;
+            this.listBoxPlateView.SelectedValueChanged += new System.EventHandler(this.listBoxPlateView_SelectedValueChanged);
             // 
             // statusStrip1
             // 
@@ -81,6 +84,7 @@
             this.listBoxTaggedPlates.Name = "listBoxTaggedPlates";
             this.listBoxTaggedPlates.Size = new System.Drawing.Size(208, 251);
             this.listBoxTaggedPlates.TabIndex = 2;
+            this.listBoxTaggedPlates.SelectedValueChanged += new System.EventHandler(this.listBoxTaggedPlates_SelectedValueChanged);
             // 
             // textBoxInput
             // 
@@ -89,6 +93,7 @@
             this.textBoxInput.Name = "textBoxInput";
             this.textBoxInput.Size = new System.Drawing.Size(208, 59);
             this.textBoxInput.TabIndex = 3;
+            this.textBoxInput.KeyDown += new System.Windows.Forms.KeyEventHandler(this.textBoxInput_KeyDown);
             // 
             // buttonEdit
             // 

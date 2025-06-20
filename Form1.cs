@@ -5,8 +5,8 @@
 // Description: A simple Windows Forms application to manage a list of licence plates.
 // --------------------------------------------------------------------------------------------------------------------
 // PROGRAM FUNCTIONALITIES                                              |   STATUS. BLANK = NOT COMPLETE
-// Open text file and load data.                                        |   
-// Save data to text file.                                              |   
+// Open text file and load data.                                        |   COMPLETE
+// Save data to text file.                                              |   COMPLETE
 // Add new rego plate.                                                  |   COMPLETE
 // Delete an existing rego plate.                                       |   COMPLETE
 // Edit or update and existing rego plate.                              |   COMPLETE
@@ -44,20 +44,27 @@ namespace at3_c_1
 
         private void buttonAdd_Click(object sender, EventArgs e)
         {
+            string plateInput = textBoxInput.Text.ToUpper();
+
             //check if the text box is empty
-            if (string.IsNullOrWhiteSpace(textBoxInput.Text))
+            if (string.IsNullOrWhiteSpace(plateInput))
             {
                 MessageBox.Show("Please enter a licence plate.");
                 return;
             }
 
             //check if the licence plate already exists
-            if (listBoxPlateView.Items.Contains(textBoxInput.Text))
+            if (listBoxPlateView.Items.Contains(plateInput))
             {
                 MessageBox.Show("This licence plate already exists.");
                 return;
             }
-            licencePlates.Add(textBoxInput.Text);
+            if (taggedPlates.Contains(plateInput))
+            {
+                MessageBox.Show("This licence plate already exists (already in tagged plates)");
+                return;
+            }
+            licencePlates.Add(plateInput);
             DisplayList();
             textBoxInput.Clear();
             textBoxInput.Focus();
@@ -65,31 +72,125 @@ namespace at3_c_1
 
         private void buttonDelete_Click(object sender, EventArgs e)
         {
-            listBoxPlateView.SetSelected(listBoxPlateView.SelectedIndex, true);
-            licencePlates.RemoveAt(listBoxPlateView.SelectedIndex);
+            int selectedIndex = listBoxPlateView.SelectedIndex;
+            int selectedTaggedIndex = listBoxTaggedPlates.SelectedIndex;
+
+            // No selection in either list
+            if (selectedIndex == -1 && selectedTaggedIndex == -1)
+            {
+                MessageBox.Show("Please select a plate to delete.");
+                return;
+            }
+
+            if (selectedIndex != -1)
+            {
+                // Delete from licencePlates list
+                string selectedPlate = listBoxPlateView.SelectedItem.ToString();
+                licencePlates.Remove(selectedPlate);
+            }
+            else if (selectedTaggedIndex != -1)
+            {
+                // Delete from taggedPlates list (remove "Tagged: " prefix first)
+                string selectedWithTag = listBoxTaggedPlates.SelectedItem.ToString();
+                const string prefix = "Tagged: ";
+                string plate = selectedWithTag.StartsWith(prefix) ? selectedWithTag.Substring(prefix.Length).Trim() : selectedWithTag;
+
+                taggedPlates.Remove(plate);
+            }
+
             DisplayList();
         }
 
         private void buttonEdit_Click(object sender, EventArgs e)
         {
-            licencePlates[listBoxPlateView.SelectedIndex] = textBoxInput.Text;
+            int selectedIndex = listBoxPlateView.SelectedIndex;
+            int selectedTaggedIndex = listBoxTaggedPlates.SelectedIndex;
+            string plateInput = textBoxInput.Text.ToUpper();
+
+            if (string.IsNullOrWhiteSpace(plateInput))
+            {
+                MessageBox.Show("Please enter a valid licence plate.");
+                return;
+            }
+            // Check if a plate is selected
+            if (selectedIndex == -1 && selectedTaggedIndex == -1)
+            {
+                MessageBox.Show("Please select a licence plate to edit.");
+                return;
+            }
+
+            // Check if the plate already exists in the list
+            if (listBoxPlateView.Items.Contains(plateInput) || taggedPlates.Contains(plateInput))
+            {
+                MessageBox.Show("This licence plate already exists.");
+                return;
+            }
+            // If a plate is selected from the main list
+            if (selectedIndex != -1)
+            {
+                // Update the licence plate in the main list
+                licencePlates[selectedIndex] = plateInput;
+            }
+            // If a plate is selected from the tagged list
+            else if (selectedTaggedIndex != -1)
+            {
+                // Update the licence plate in the tagged list (remove "Tagged: " prefix first)
+                string selectedWithTag = listBoxTaggedPlates.SelectedItem.ToString();
+                const string prefix = "Tagged: ";
+                string oldPlate = selectedWithTag.StartsWith(prefix) ? selectedWithTag.Substring(prefix.Length).Trim() : selectedWithTag;
+                // Remove the old plate and add the new one
+                taggedPlates.Remove(oldPlate);
+                taggedPlates.Add(plateInput);
+            }
             textBoxInput.Clear();
             DisplayList();
         }
 
         private void buttonTag_Click(object sender, EventArgs e)
         {
-            listBoxPlateView.SetSelected(listBoxPlateView.SelectedIndex, true);
-            string selectedPlate = listBoxPlateView.SelectedItem.ToString();
-            if (!taggedPlates.Contains(selectedPlate))
+            // Tag from the main plates list
+            if (listBoxPlateView.SelectedIndex != -1)
             {
-                taggedPlates.Add(selectedPlate);
-                MessageBox.Show($"Licence plate {selectedPlate} has been tagged for further investigation.");
+                string selectedPlate = listBoxPlateView.SelectedItem.ToString();
+
+                if (!taggedPlates.Contains(selectedPlate))
+                {
+                    taggedPlates.Add(selectedPlate);
+                    licencePlates.Remove(selectedPlate);
+                    MessageBox.Show($"Licence plate {selectedPlate} has been tagged.");
+                }
+                else
+                {
+                    MessageBox.Show($"Licence plate {selectedPlate} is already tagged.");
+                }
+            }
+            // Untag from the tagged plates list
+            else if (listBoxTaggedPlates.SelectedIndex != -1)
+            {
+                string selectedWithTag = listBoxTaggedPlates.SelectedItem.ToString();
+
+                const string prefix = "Tagged: ";
+                string selectedPlate = selectedWithTag.StartsWith(prefix)
+                                       ? selectedWithTag.Substring(prefix.Length).Trim()
+                                       : selectedWithTag;
+
+                if (taggedPlates.Contains(selectedPlate))
+                {
+                    taggedPlates.Remove(selectedPlate);
+                    licencePlates.Add(selectedPlate);
+                    MessageBox.Show($"Licence plate {selectedPlate} has been untagged.");
+                }
+                else
+                {
+                    MessageBox.Show($"Licence plate {selectedPlate} is not tagged.");
+                }
             }
             else
             {
-                MessageBox.Show($"Licence plate {selectedPlate} is already tagged.");
+                MessageBox.Show("Please select a licence plate to tag or untag.");
+                return;
             }
+
             DisplayList();
         }
 
@@ -115,47 +216,6 @@ namespace at3_c_1
             }
         }
 
-
-        //common functions
-        private void DisplayList()
-        {
-            listBoxPlateView.Items.Clear();
-            listBoxTaggedPlates.Items.Clear();
-            foreach (var plate in licencePlates)
-            {
-                if (!taggedPlates.Contains(plate))
-                {
-                    listBoxPlateView.Items.Add(plate);
-                }
-            }
-            foreach (var taggedPlate in taggedPlates)
-            {
-                listBoxTaggedPlates.Items.Add($"Tagged: {taggedPlate}");
-            }
-        }
-
-        private void SaveTextFile(string fileName)
-        {
-            try
-            {
-                using (StreamWriter writer = new StreamWriter(fileName, false))
-                {
-                    foreach (var plate in licencePlates)
-                    {
-                        writer.WriteLine(plate);
-                    }
-                    foreach (var taggedPlate in taggedPlates)
-                    {
-                        writer.WriteLine($"Tagged: {taggedPlate}");
-                    }
-                }
-            }
-            catch (IOException)
-            {
-                MessageBox.Show("File NOT saved");
-            }
-        }
-
         private void buttonOpen_Click(object sender, EventArgs e)
         {
             string listsFolder = Path.Combine(Application.StartupPath, "lists");
@@ -168,7 +228,7 @@ namespace at3_c_1
 
             OpenFileDialog openFileDialog = new OpenFileDialog();
             openFileDialog.InitialDirectory = listsFolder;
-            openFileDialog.Filter = "Text files (*.txt)|*.txt";
+            openFileDialog.Filter = "Day files (day_*.txt)|day_*.txt";
             openFileDialog.Title = "Select a list file";
 
             if (openFileDialog.ShowDialog() == DialogResult.OK)
@@ -202,6 +262,74 @@ namespace at3_c_1
                 {
                     MessageBox.Show("Failed to read file: " + ex.Message);
                 }
+            }
+        }
+
+        //common functions
+        private void DisplayList()
+        {
+            listBoxPlateView.Items.Clear();
+            listBoxTaggedPlates.Items.Clear();
+            foreach (var plate in licencePlates)
+            {
+                if (!taggedPlates.Contains(plate))
+                {
+                    listBoxPlateView.Items.Add(plate);
+                }
+            }
+            foreach (var taggedPlate in taggedPlates)
+            {
+                listBoxTaggedPlates.Items.Add($"Tagged: {taggedPlate}");
+            }
+        }
+
+        // saves the text file to the location specified by the user
+        private void SaveTextFile(string fileName)
+        {
+            try
+            {
+                using (StreamWriter writer = new StreamWriter(fileName, false))
+                {
+                    foreach (var plate in licencePlates)
+                    {
+                        writer.WriteLine(plate);
+                    }
+                    foreach (var taggedPlate in taggedPlates)
+                    {
+                        writer.WriteLine($"Tagged: {taggedPlate}");
+                    }
+                }
+            }
+            catch (IOException)
+            {
+                MessageBox.Show("File NOT saved");
+            }
+        }
+
+        // allows for enter to add a plate rather than having to press add every time
+        private void textBoxInput_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                buttonAdd.PerformClick();
+                e.SuppressKeyPress = true;
+            }
+        }
+
+        // only allows for 1 item to be selected (unselects item in one box if other box is selected)
+        private void listBoxPlateView_SelectedValueChanged(object sender, EventArgs e)
+        {
+            if (listBoxPlateView.SelectedIndex != -1)
+            {
+                listBoxTaggedPlates.ClearSelected();
+            }
+        }
+
+        private void listBoxTaggedPlates_SelectedValueChanged(object sender, EventArgs e)
+        {
+            if (listBoxTaggedPlates.SelectedIndex != -1)
+            {
+                listBoxPlateView.ClearSelected();
             }
         }
     }
