@@ -556,5 +556,63 @@ namespace at3_c_1
             textBoxInput.Clear();
             textBoxInput.Focus();
         }
+
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            // Prompt user to save changes if there are any unsaved changes
+            DialogResult result = MessageBox.Show(
+                "Do you want to save changes before exiting?",
+                "Confirm Save",
+                MessageBoxButtons.YesNoCancel,
+                MessageBoxIcon.Question);
+
+            // If user chooses to cancel, prevent the form from closing
+            if (result == DialogResult.Cancel)
+            {
+                e.Cancel = true; // Cancel closing if user chooses to cancel
+                return;
+            }
+            // If user chooses not to save, just close the form
+            else if (result == DialogResult.No)
+            {
+                return;
+            }
+
+            // executed if usesr chooses to save
+
+            // Ensure the folder exists
+            string folderPath = Path.Combine(Application.StartupPath, "lists");
+            if (!Directory.Exists(folderPath))
+            {
+                Directory.CreateDirectory(folderPath);
+            }
+
+            // Generate a unique file name
+            int fileNumber = 1;
+            string fileName;
+            string filePath;
+
+            do
+            {
+                fileName = $"day_{fileNumber:D2}.txt";
+                filePath = Path.Combine(folderPath, fileName);
+                fileNumber++;
+            } while (File.Exists(filePath));
+
+            //write data
+            using (StreamWriter writer = new StreamWriter(filePath, false))
+            {
+                foreach (string plate in licencePlates)
+                {
+                    writer.WriteLine(plate);
+                }
+                foreach (string taggedPlate in taggedPlates)
+                {
+                    writer.WriteLine($"Tagged: {taggedPlate}");
+                }
+            }
+            // Notify user of successful save, close once user clicks ok
+            MessageBox.Show($"Data saved to {fileName} successfully.", "Save", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
     }
 }
