@@ -51,19 +51,19 @@ namespace at3_c_1
             //check if the text box is empty
             if (string.IsNullOrWhiteSpace(plateInput))
             {
-                MessageBox.Show("Please enter a licence plate.");
+                toolStripStatusLabel1.Text = "Please enter a valid licence plate";
                 return;
             }
 
             //check if the licence plate already exists
             if (listBoxPlateView.Items.Contains(plateInput))
             {
-                MessageBox.Show("This licence plate already exists.");
+                toolStripStatusLabel1.Text = "This licence plate already exists.";
                 return;
             }
             if (taggedPlates.Contains(plateInput))
             {
-                MessageBox.Show("This licence plate already exists (already in tagged plates)");
+                toolStripStatusLabel1.Text = "This licence plate already exists (already in tagged plates)";
                 return;
             }
             licencePlates.Add(plateInput);
@@ -81,7 +81,7 @@ namespace at3_c_1
             // No selection in either list
             if (selectedIndex == -1 && selectedTaggedIndex == -1)
             {
-                MessageBox.Show("Please select a plate to delete.");
+                toolStripStatusLabel1.Text = "Please select a plate to delete.";
                 return;
             }
 
@@ -90,6 +90,8 @@ namespace at3_c_1
                 // Delete from licencePlates list
                 string selectedPlate = listBoxPlateView.SelectedItem.ToString();
                 licencePlates.Remove(selectedPlate);
+
+                toolStripStatusLabel1.Text = $"Licence plate '{selectedPlate}' has been deleted from the main list.";
             }
             else if (selectedTaggedIndex != -1)
             {
@@ -97,10 +99,9 @@ namespace at3_c_1
                 string selectedWithTag = listBoxTaggedPlates.SelectedItem.ToString();
                 const string prefix = "Tagged: ";
                 string plate = selectedWithTag.StartsWith(prefix) ? selectedWithTag.Substring(prefix.Length).Trim() : selectedWithTag;
-
                 taggedPlates.Remove(plate);
+                toolStripStatusLabel1.Text = $"Licence plate '{plate}' has been deleted from the tagged list.";
             }
-
             isModified = true;
             DisplayList();
         }
@@ -113,20 +114,20 @@ namespace at3_c_1
 
             if (string.IsNullOrWhiteSpace(plateInput))
             {
-                MessageBox.Show("Please enter a valid licence plate.");
+                toolStripStatusLabel1.Text = "Please enter a valid licence plate.";
                 return;
             }
             // Check if a plate is selected
             if (selectedIndex == -1 && selectedTaggedIndex == -1)
             {
-                MessageBox.Show("Please select a licence plate to edit.");
+                toolStripStatusLabel1.Text = "Please select a licence plate to edit.";
                 return;
             }
 
             // Check if the plate already exists in the list
             if (listBoxPlateView.Items.Contains(plateInput) || taggedPlates.Contains(plateInput))
             {
-                MessageBox.Show("This licence plate already exists.");
+                toolStripStatusLabel1.Text = "This licence plate already exists.";
                 return;
             }
             // If a plate is selected from the main list
@@ -134,6 +135,7 @@ namespace at3_c_1
             {
                 // Update the licence plate in the main list
                 licencePlates[selectedIndex] = plateInput;
+                toolStripStatusLabel1.Text = $"Licence plate at index {selectedIndex} has been updated to '{plateInput}' in the main list.";
             }
             // If a plate is selected from the tagged list
             else if (selectedTaggedIndex != -1)
@@ -145,6 +147,7 @@ namespace at3_c_1
                 // Remove the old plate and add the new one
                 taggedPlates.Remove(oldPlate);
                 taggedPlates.Add(plateInput);
+                toolStripStatusLabel1.Text = $"Licence plate '{oldPlate}' has been updated to '{plateInput}' in the tagged list.";
             }
             textBoxInput.Clear();
             isModified = true;
@@ -165,11 +168,11 @@ namespace at3_c_1
                 {
                     taggedPlates.Add(selectedPlate);
                     licencePlates.Remove(selectedPlate);
-                    MessageBox.Show($"Licence plate {selectedPlate} has been tagged.");
+                    toolStripStatusLabel1.Text = $"Licence plate {selectedPlate} has been tagged.";
                 }
                 else
                 {
-                    MessageBox.Show($"Licence plate {selectedPlate} is already tagged.");
+                    toolStripStatusLabel1.Text = $"Licence plate {selectedPlate} is already tagged.";
                 }
             }
             // Untag from the tagged plates list
@@ -186,16 +189,16 @@ namespace at3_c_1
                 {
                     taggedPlates.Remove(selectedPlate);
                     licencePlates.Add(selectedPlate);
-                    MessageBox.Show($"Licence plate {selectedPlate} has been untagged.");
+                    toolStripStatusLabel1.Text = $"Licence plate {selectedPlate} has been untagged.";
                 }
                 else
                 {
-                    MessageBox.Show($"Licence plate {selectedPlate} is not tagged.");
+                    toolStripStatusLabel1.Text = $"Licence plate {selectedPlate} is not tagged.";
                 }
             }
             else
             {
-                MessageBox.Show("Please select a licence plate to tag or untag.");
+                toolStripStatusLabel1.Text = "Please select a licence plate to tag or untag.";
                 return;
             }
 
@@ -299,11 +302,12 @@ namespace at3_c_1
                         }
                     }
                     DisplayList();
-                    MessageBox.Show("File loaded successfully.", "Open", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    string fileName = Path.GetFileName(filePath);
+                    toolStripStatusLabel1.Text = $"File '{fileName}' loaded successfully.";
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Failed to read file: " + ex.Message);
+                    toolStripStatusLabel1.Text = "Failed to read file: " + ex.Message;
                 }
             }
             isModified = true;
@@ -394,7 +398,7 @@ namespace at3_c_1
                 }
             }
             // Notify user of successful save, close once user clicks ok
-            MessageBox.Show($"Data saved to {fileName} successfully.", "Save", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            toolStripStatusLabel1.Text = $"Data saved to {fileName} successfully.";
         }
         #endregion File Operations
 
@@ -439,7 +443,7 @@ namespace at3_c_1
 
             if (string.IsNullOrWhiteSpace(target))
             {
-                MessageBox.Show("Please enter a licence plate to search for.");
+                toolStripStatusLabel1.Text = "Please enter a licence plate to search for.";
                 return;
             }
 
@@ -487,7 +491,7 @@ namespace at3_c_1
 
             if (string.IsNullOrWhiteSpace(target))
             {
-                MessageBox.Show("Please enter a licence plate to search for.");
+                toolStripStatusLabel1.Text = "Please enter a licence plate to search for.";
                 return;
             }
 
@@ -610,7 +614,8 @@ namespace at3_c_1
                 {
                     textBoxInput.Clear();
                 }
-
+                
+                toolStripStatusLabel1.Text = $"Licence plate '{selectedPlate}' has been removed from tagged plates.";
                 // Refresh the display
                 DisplayList();
             }
