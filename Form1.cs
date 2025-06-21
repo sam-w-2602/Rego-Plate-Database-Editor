@@ -603,6 +603,7 @@ namespace at3_c_1
                     textBoxInput.Clear();
                 }
 
+                toolStripStatusLabel1.Text = $"Licence plate '{selectedPlate}' has been removed from the main list.";
                 // Refresh both list boxes
                 DisplayList();
             }
