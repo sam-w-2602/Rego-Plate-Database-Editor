@@ -67,6 +67,7 @@ namespace at3_c_1
                 return;
             }
             licencePlates.Add(plateInput);
+            toolStripStatusLabel1.Text = $"Licence plate '{plateInput}' has been added to the main list.";
             DisplayList();
             textBoxInput.Clear();
             textBoxInput.Focus();
@@ -85,24 +86,47 @@ namespace at3_c_1
                 return;
             }
 
+            string selectedPlate = null;
+
             if (selectedIndex != -1)
             {
-                // Delete from licencePlates list
-                string selectedPlate = listBoxPlateView.SelectedItem.ToString();
-                licencePlates.Remove(selectedPlate);
+                selectedPlate = listBoxPlateView.SelectedItem.ToString();
+            }
+            else if (selectedTaggedIndex != -1)
+            {
+                string selectedWithTag = listBoxTaggedPlates.SelectedItem.ToString();
+                const string prefix = "Tagged: ";
+                selectedPlate = selectedWithTag.StartsWith(prefix)
+                    ? selectedWithTag.Substring(prefix.Length).Trim()
+                    : selectedWithTag;
+            }
 
+            DialogResult result = MessageBox.Show(
+                $"Are you sure you want to delete the licence plate '{selectedPlate}'?",
+                "Confirm Deletion",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Warning);
+
+            if (result == DialogResult.No)
+            {
+                toolStripStatusLabel1.Text = "Deletion cancelled.";
+                return;
+            }
+
+            // Proceed with deletion
+            if (selectedIndex != -1)
+            {
+                licencePlates.Remove(selectedPlate);
                 toolStripStatusLabel1.Text = $"Licence plate '{selectedPlate}' has been deleted from the main list.";
             }
             else if (selectedTaggedIndex != -1)
             {
-                // Delete from taggedPlates list (remove "Tagged: " prefix first)
-                string selectedWithTag = listBoxTaggedPlates.SelectedItem.ToString();
-                const string prefix = "Tagged: ";
-                string plate = selectedWithTag.StartsWith(prefix) ? selectedWithTag.Substring(prefix.Length).Trim() : selectedWithTag;
-                taggedPlates.Remove(plate);
-                toolStripStatusLabel1.Text = $"Licence plate '{plate}' has been deleted from the tagged list.";
+                taggedPlates.Remove(selectedPlate);
+                toolStripStatusLabel1.Text = $"Licence plate '{selectedPlate}' has been deleted from the tagged list.";
             }
+
             isModified = true;
+            textBoxInput.Clear();
             DisplayList();
         }
 
