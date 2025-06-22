@@ -328,13 +328,13 @@ namespace at3_c_1
                     DisplayList();
                     string fileName = Path.GetFileName(filePath);
                     toolStripStatusLabel1.Text = $"File '{fileName}' loaded successfully.";
+                    isModified = false;
                 }
                 catch (Exception ex)
                 {
                     toolStripStatusLabel1.Text = "Failed to read file: " + ex.Message;
                 }
             }
-            isModified = true;
         }
 
         // saves the text file to the location specified by the user
@@ -616,33 +616,41 @@ namespace at3_c_1
 
             string selectedWithPrefix = listBoxTaggedPlates.SelectedItem.ToString();
 
-            // Remove "Tagged: " prefix to get the actual plate
+            // Remove "Tagged: " prefix
             const string prefix = "Tagged: ";
             string selectedPlate = selectedWithPrefix.StartsWith(prefix)
                 ? selectedWithPrefix.Substring(prefix.Length).Trim()
                 : selectedWithPrefix;
 
-            // Confirm removal
+            // Confirm untag
             DialogResult result = MessageBox.Show(
-                $"Do you want to remove tagged licence plate '{selectedPlate}'?",
-                "Confirm Removal",
+                $"Do you want to untag licence plate '{selectedPlate}'?",
+                "Confirm Untag",
                 MessageBoxButtons.OKCancel,
-                MessageBoxIcon.Warning);
+                MessageBoxIcon.Question);
 
             if (result == DialogResult.OK)
             {
-                // Remove from taggedPlates list
+                // Remove from tagged list
                 taggedPlates.Remove(selectedPlate);
 
-                // Clear input box if it matches
+                // Add back to main list if it's not already there
+                if (!licencePlates.Contains(selectedPlate))
+                {
+                    licencePlates.Add(selectedPlate);
+                }
+
+                // Clear input if it matches
                 if (textBoxInput.Text.Trim().Equals(selectedPlate, StringComparison.OrdinalIgnoreCase))
                 {
                     textBoxInput.Clear();
                 }
-                
-                toolStripStatusLabel1.Text = $"Licence plate '{selectedPlate}' has been removed from tagged plates.";
-                // Refresh the display
+
+                toolStripStatusLabel1.Text = $"Licence plate '{selectedPlate}' has been untagged and returned to the main list.";
+
+                // Refresh both lists
                 DisplayList();
+                isModified = true; // Mark as modified
             }
         }
 
