@@ -267,16 +267,36 @@ namespace at3_c_1
         {
             string listsFolder = Path.Combine(Application.StartupPath, "lists");
 
+            if (licencePlates.Count == 0 && taggedPlates.Count == 0)
+            {
+                toolStripStatusLabel1.Text = "Cannot save an empty file. Add some licence plates first.";
+                return;
+            }
+
             // Ensure the folder exists
             if (!Directory.Exists(listsFolder))
             {
                 Directory.CreateDirectory(listsFolder);
             }
 
+            //find next file number
+            int fileNumber = 1;
+            string suggestedFileName;
+            string fullPath;
+
+            do
+            {
+                suggestedFileName = $"day_{fileNumber:D2}.txt";
+                fullPath = Path.Combine(listsFolder, suggestedFileName);
+                fileNumber++;
+            } while (File.Exists(fullPath));
+
+
             SaveFileDialog saveTextFileDialog = new SaveFileDialog();
             saveTextFileDialog.InitialDirectory = listsFolder;
             saveTextFileDialog.Filter = "Text files (*.txt)|*.txt|All files (*.*)|*.*";
             saveTextFileDialog.Title = "Save your text file";
+            saveTextFileDialog.FileName = suggestedFileName;
 
             DialogResult sr = saveTextFileDialog.ShowDialog();
             if (sr == DialogResult.OK)
